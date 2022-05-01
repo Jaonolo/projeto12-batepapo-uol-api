@@ -1,8 +1,10 @@
 import express from "express";
 import cors from "cors"
 import dotenv from "dotenv"
+
 import participants from "./routes/participants.js"
 import messages from "./routes/messages.js"
+import status from "./routes/status.js"
 
 dotenv.config()
 let { PORT } = process.env
@@ -19,6 +21,8 @@ app.get("/participants", participants.get)
 app.post("/messages", messages.post)
 
 app.get("/messages", messages.get)
+
+app.post("/status", status.post)
 
 app.get("/", (req, res) => res.send("Servidor funcionando!"))
 
