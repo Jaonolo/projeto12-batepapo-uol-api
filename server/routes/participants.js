@@ -1,4 +1,6 @@
 import db from "../db.js"
+import Joi from "joi"
+import dayjs from "dayjs"
 
 const get = (req, res) => {
     db.collection("participants").find().toArray().then((result) => {
@@ -6,28 +8,37 @@ const get = (req, res) => {
     })
 }
 
-const post = (req, res) => {
+const post = async (req, res) => {
     const { name } = req.body
-    if(!name) {
-        res.status(422)
-        res.send("Erro!")
+
+    const schema = Joi.object({
+        name: Joi.string()
+            .min(1)
+            .required()
+    })
+
+    if(schema.validate(req.body).error) {
+        res.sendStatus(422)
         return
     }
-    db.collection("participants").find({ name: name }).toArray().then((result) => {
-        if(result.length !== 0) {
-            res.status(409)
-            res.send("Erro!")
-            return 
-        }
-        db.collection("participants").insertOne({ name: name, lastStatus: Date.now() }).then(() => res.send("Ok!"))
-        db.collection("messages").insertOne({
-            from: name,
-            to: 'Todos',
-            text: 'entra na sala...',
-            type: 'status',
-            time: 'HH:MM:SS'
-        })
+
+    const result = await db.collection("participants").find({ name: name }).toArray()
+    
+    if(result.length !== 0) {
+        res.sendStatus(409)
+        return 
+    }
+
+    await db.collection("participants").insertOne({ name: name, lastStatus: Date.now() })
+    await db.collection("messages").insertOne({
+        from: name,
+        to: 'Todos',
+        text: 'entra na sala...',
+        type: 'status',
+        time: dayjs().format('HH:mm:ss')
     })
+    
+    res.sendStatus(201)
 }
 
 export default { get: get, post: post }
