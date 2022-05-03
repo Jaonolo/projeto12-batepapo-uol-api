@@ -2,10 +2,9 @@ import db from "../db.js"
 import Joi from "joi"
 import dayjs from "dayjs"
 
-const get = (req, res) => {
-    db.collection("participants").find().toArray().then((result) => {
-        res.send(result)
-    })
+const get = async (req, res) => {
+    const result = await db.collection("participants").find().toArray()
+    res.send(result)
 }
 
 const post = async (req, res) => {
@@ -37,7 +36,7 @@ const post = async (req, res) => {
         type: 'status',
         time: dayjs().format('HH:mm:ss')
     })
-    
+
     res.sendStatus(201)
 }
 
